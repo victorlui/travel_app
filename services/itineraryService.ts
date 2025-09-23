@@ -20,7 +20,6 @@ export interface Activity {
 
 export const generateItinerary = async (stepData: StepData): Promise<any> => {
   try {
-    console.log("stepData", stepData);
     const data = {
       destination: stepData.destination,
       start_date: stepData.startDate?.toISOString(),

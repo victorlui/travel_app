@@ -8,6 +8,7 @@ import { StepIndicator } from "@/components/ui/StepIndicator";
 import { AppColors } from "@/constants/colors";
 import { useStepNavigation } from "@/hooks/useStepNavigation";
 import { generateItinerary } from "@/services/itineraryService";
+import { useItineraryGenerationStore } from "@/store/itinerary_generation_store";
 import { useRouter } from "expo-router";
 import React from "react";
 import { StatusBar, StyleSheet, View } from "react-native";
@@ -28,12 +29,13 @@ export default function CreateItinerary() {
   } = useStepNavigation(5);
 
   const router = useRouter();
-
+  const { setItineraryGeneration } = useItineraryGenerationStore.getState();
   const handleNext = async () => {
     if (isLastStep) {
       try {
-        const res = await generateItinerary(stepData);
-        console.log("res", res);
+        const response = await generateItinerary(stepData);
+        console.log("res", response);
+        setItineraryGeneration(response);
         router.replace("/(app)/itinerary_generation");
       } catch (error) {
         console.log("error", error);
@@ -132,7 +134,6 @@ export default function CreateItinerary() {
 const styles = StyleSheet.create({
   stepContent: {
     flex: 1,
-    paddingHorizontal: 20,
   },
   navigationContainer: {
     flexDirection: "row",

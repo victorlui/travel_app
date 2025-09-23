@@ -5,7 +5,8 @@ const RootLayoutApp: React.FC = () => {
   return (
     <Stack>
       {/* //<Stack.Screen name="index" options={{ headerShown: false }} /> */}
-      <Stack.Screen name="intro" options={{ headerShown: false }} />
+      <Stack.Screen name="welcome" options={{ headerShown: false }} />
+      <Stack.Screen name="home" options={{ headerShown: false }} />
       <Stack.Screen name="create-itinerary" options={{ headerShown: false }} />
       <Stack.Screen
         name="itinerary_generation"

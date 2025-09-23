@@ -29,7 +29,7 @@ export function FormInput({
         <TextInput
           style={[
             styles.input,
-            icon && styles.inputWithIcon,
+            icon ? styles.inputWithIcon : null,
             error && styles.inputError,
             style,
           ]}
@@ -44,7 +44,7 @@ export function FormInput({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   label: {
     fontSize: 16,
