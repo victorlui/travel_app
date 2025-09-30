@@ -18,7 +18,7 @@ const RootLayout: React.FC = () => {
 
       setTimeout(() => {
         if (isAuthenticated) {
-          router.replace("/(app)/home");
+          router.replace("/(app)/(tabs)/home");
         }
       }, 200);
     };
@@ -29,9 +29,9 @@ const RootLayout: React.FC = () => {
   return (
     <>
       <Stack>
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="intro" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
       </Stack>
       <AlertContainer />
 

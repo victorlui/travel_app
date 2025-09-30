@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import * as SecureStore from 'expo-secure-store';
-import { AuthStore, AuthResponse } from '@/types/auth';
+import { AuthResponse, AuthStore } from "@/types/auth";
+import * as SecureStore from "expo-secure-store";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 // Adaptador personalizado para SecureStore
 const secureStoreAdapter = {
@@ -10,7 +10,7 @@ const secureStoreAdapter = {
       const value = await SecureStore.getItemAsync(name);
       return value;
     } catch (error) {
-      console.error('Error getting item from SecureStore:', error);
+      console.error("Error getting item from SecureStore:", error);
       return null;
     }
   },
@@ -18,14 +18,14 @@ const secureStoreAdapter = {
     try {
       await SecureStore.setItemAsync(name, value);
     } catch (error) {
-      console.error('Error setting item in SecureStore:', error);
+      console.error("Error setting item in SecureStore:", error);
     }
   },
   removeItem: async (name: string): Promise<void> => {
     try {
       await SecureStore.deleteItemAsync(name);
     } catch (error) {
-      console.error('Error removing item from SecureStore:', error);
+      console.error("Error removing item from SecureStore:", error);
     }
   },
 };
@@ -40,7 +40,7 @@ export const useAuthStore = create<AuthStore>()(
       isLoading: false,
 
       // Ações
-      login: (authData: AuthResponse['data']) => {
+      login: (authData: AuthResponse["data"]) => {
         set({
           user: authData.user,
           accessToken: authData.access_token,
@@ -56,6 +56,7 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: false,
           isLoading: false,
         });
+        secureStoreAdapter.removeItem("auth-storage");
       },
 
       setLoading: (loading: boolean) => {
@@ -72,7 +73,7 @@ export const useAuthStore = create<AuthStore>()(
       },
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
       storage: createJSONStorage(() => secureStoreAdapter),
       // Apenas persistir dados essenciais
       partialize: (state) => ({
@@ -87,5 +88,6 @@ export const useAuthStore = create<AuthStore>()(
 // Seletores úteis
 export const useUser = () => useAuthStore((state) => state.user);
 export const useAccessToken = () => useAuthStore((state) => state.accessToken);
-export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => state.isAuthenticated);
 export const useIsLoading = () => useAuthStore((state) => state.isLoading);

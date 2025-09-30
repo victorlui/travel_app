@@ -40,11 +40,14 @@ export async function loginUser(email: string, password: string) {
   const { login, setLoading } = useAuthStore.getState();
   const { showAlert } = useAlertStore.getState();
 
+  setLoading(true);
   try {
     const response = await api.post<AuthResponse>("/users/login", {
       email,
       password,
     });
+
+    console.log("response", response.data);
 
     // Armazenar os dados no store usando SecureStore
     if (response.data.success && response.data.data) {
@@ -59,8 +62,9 @@ export async function loginUser(email: string, password: string) {
       message: "E-mail ou senha inválidas",
       duration: 5000,
     });
-    setLoading(false);
     throw error;
+  } finally {
+    setLoading(false);
   }
 }
 

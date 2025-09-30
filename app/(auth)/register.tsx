@@ -103,8 +103,8 @@ export default function RegisterScreen() {
 
     try {
       await registerUser(name, email, password);
-      router.replace("/(app)/intro");
-    } catch (error: any) {
+      router.replace("/(app)/welcome");
+    } finally {
       setLoading(false);
     }
   };

@@ -3,15 +3,17 @@ import React from "react";
 
 const RootLayoutApp: React.FC = () => {
   return (
-    <Stack>
-      {/* //<Stack.Screen name="index" options={{ headerShown: false }} /> */}
-      <Stack.Screen name="welcome" options={{ headerShown: false }} />
-      <Stack.Screen name="home" options={{ headerShown: false }} />
-      <Stack.Screen name="create-itinerary" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="itinerary_generation"
-        options={{ headerShown: false }}
-      />
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      {/* //<Stack.Screen name="index"  /> */}
+      <Stack.Screen name="welcome" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="create-itinerary" />
+      <Stack.Screen name="itinerary_generation" />
+      <Stack.Screen name="profile" />
     </Stack>
   );
 };

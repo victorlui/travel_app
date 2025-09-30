@@ -1,6 +1,8 @@
 import { FormInput } from "@/components/form/FormInput";
 import { PrimaryButton } from "@/components/form/PrimaryButton";
 import { AppColors } from "@/constants/colors";
+import { loginUser } from "@/services/authService";
+import { useAuthStore } from "@/store/authStore";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -23,12 +25,13 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
 
   const router = useRouter();
+  const { isLoading } = useAuthStore();
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -52,19 +55,22 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validateForm()) return;
 
-    setLoading(true);
-
     // Simular login (substituir pela lógica real de autenticação)
-    setTimeout(() => {
-      setLoading(false);
-      router.replace("/(app)");
-    }, 2000);
+    try {
+      await loginUser(email, password);
+      //router.push("/(app)/welcome");
+    } catch (error) {
+      setErrors({
+        email: "Email ou senha inválidos",
+        password: "Email ou senha inválidos",
+      });
+    }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login com ${provider}`);
-    // Implementar login social
-  };
+  //   const handleSocialLogin = (provider: string) => {
+  //     console.log(`Login com ${provider}`);
+  //     // Implementar login social
+  //   };
 
   const goToSignup = () => {
     router.push("/(auth)/register");
@@ -180,7 +186,7 @@ export default function LoginScreen() {
               <PrimaryButton
                 title="Entrar"
                 onPress={handleLogin}
-                loading={loading}
+                loading={isLoading}
                 style={styles.loginButton}
               />
 
