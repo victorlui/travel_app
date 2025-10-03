@@ -1,12 +1,15 @@
+import { Plan } from "./plan";
+
 export interface User {
   id: number;
   name: string;
   email: string;
+  phone: string;
   password: string;
-  is_premium: boolean;
   itinerary_count_monthly: number;
   last_reset_itinerary_count: string;
   status: string;
+  plan: Plan | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,7 +31,7 @@ export interface AuthState {
 }
 
 export interface AuthActions {
-  login: (authData: AuthResponse['data']) => void;
+  login: (authData: AuthResponse["data"]) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
   updateUser: (userData: Partial<User>) => void;

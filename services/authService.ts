@@ -47,8 +47,6 @@ export async function loginUser(email: string, password: string) {
       password,
     });
 
-    console.log("response", response.data);
-
     // Armazenar os dados no store usando SecureStore
     if (response.data.success && response.data.data) {
       login(response.data.data);

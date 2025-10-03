@@ -1,10 +1,18 @@
-import StatusBarComponent from "@/components/ui/StatusBar";
+import Header from "@/components/ui/Header";
 import { AppColors } from "@/constants/colors";
+import LayoutMain from "@/layouts/LayoutApp";
+import { useUserService } from "@/services/user";
 import { useAuthStore } from "@/store/authStore";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  formatPhoneBrazil,
+  isValidBrazilianPhone,
+  unformatPhone,
+  validatePhoneInput,
+} from "@/utils/helpers";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -13,22 +21,76 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EditProfileScreen() {
   const { user } = useAuthStore();
+  const { updateProfile } = useUserService();
   const insets = useSafeAreaInsets();
 
-  const [name, setName] = useState(user?.name || "Maria Silva");
-  const [email, setEmail] = useState(user?.email || "maria.silva@email.com");
-  const [phone, setPhone] = useState("(11) 99999-9999");
+  const [name, setName] = useState(user?.name || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState(
+    formatPhoneBrazil(user?.phone || "") || ""
+  );
+  const [phoneError, setPhoneError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSave = () => {
-    Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
-    router.back();
+  const handlePhoneChange = (text: string) => {
+    // Usa a função de validação que impede entrada inválida
+    const validatedPhone = validatePhoneInput(text, phone);
+    setPhone(validatedPhone);
+
+    // Limpa o erro quando o usuário está digitando
+    if (phoneError) {
+      setPhoneError("");
+    }
+  };
+
+  const validatePhone = () => {
+    if (phone.trim() === "") {
+      setPhoneError("");
+      return true; // Campo opcional
+    }
+
+    const phoneNumbers = unformatPhone(phone);
+
+    if (phoneNumbers.length < 10) {
+      setPhoneError("Telefone deve ter pelo menos 10 dígitos");
+      return false;
+    }
+
+    if (!isValidBrazilianPhone(phone)) {
+      setPhoneError("Número de telefone inválido");
+      return false;
+    }
+
+    setPhoneError("");
+    return true;
+  };
+
+  const handleSave = async () => {
+    // Valida o telefone antes de salvar
+    if (!validatePhone()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await updateProfile({
+        name,
+        email,
+        phone: unformatPhone(phone),
+      });
+      Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+      router.back();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Alert.alert("Erro", "Ocorreu um erro ao atualizar o perfil.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -36,15 +98,8 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.container}>
-      <StatusBarComponent backgroundColor={AppColors.surface} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={AppColors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Perfil</Text>
-        <View style={styles.placeholder} />
-      </View>
+    <LayoutMain>
+      <Header title="Editar" />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -74,26 +129,49 @@ export default function EditProfileScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Telefone (opcional)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, phoneError ? styles.inputError : null]}
               value={phone}
-              onChangeText={setPhone}
-              placeholder="Digite seu telefone"
-              keyboardType="phone-pad"
+              onChangeText={handlePhoneChange}
+              onBlur={validatePhone}
+              placeholder="(11) 99999-9999"
+              keyboardType="numeric"
+              maxLength={15}
             />
+            {phoneError ? (
+              <Text style={styles.errorText}>{phoneError}</Text>
+            ) : null}
           </View>
         </View>
       </ScrollView>
       <View
         style={[styles.actionButtons, { paddingBottom: insets.bottom * 1.3 }]}
       >
-        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Salvar alterações</Text>
+        {!isLoading && (
+          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+            <Text style={styles.cancelButtonText}>Cancelar</Text>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity
+          style={[styles.saveButton, isLoading && styles.saveButtonLoading]}
+          onPress={handleSave}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator
+                size="small"
+                color={AppColors.surface}
+                style={styles.loadingSpinner}
+              />
+              <Text style={styles.saveButtonText}>Salvando...</Text>
+            </View>
+          ) : (
+            <Text style={styles.saveButtonText}>Salvar alterações</Text>
+          )}
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </LayoutMain>
   );
 }
 
@@ -125,6 +203,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    backgroundColor: AppColors.surface,
   },
   profileSection: {
     alignItems: "center",
@@ -162,7 +241,6 @@ const styles = StyleSheet.create({
   },
   formSection: {
     backgroundColor: AppColors.surface,
-    marginTop: 16,
     paddingHorizontal: 20,
     paddingVertical: 24,
   },
@@ -185,76 +263,13 @@ const styles = StyleSheet.create({
     color: AppColors.text,
     backgroundColor: AppColors.surface,
   },
-  notificationSection: {
-    backgroundColor: AppColors.surface,
-    marginTop: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
+  inputError: {
+    borderColor: "#FF6B6B",
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: AppColors.text,
-    marginBottom: 16,
-  },
-  notificationItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-  },
-  notificationInfo: {
-    flex: 1,
-    marginRight: 16,
-  },
-  notificationTitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: AppColors.text,
-    marginBottom: 4,
-  },
-  notificationSubtitle: {
-    fontSize: 14,
-    color: AppColors.textSecondary,
-  },
-  planSection: {
-    backgroundColor: AppColors.surface,
-    marginTop: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    marginBottom: 100, // Espaço para os botões fixos
-  },
-  planCard: {
-    borderWidth: 1,
-    borderColor: AppColors.border,
-    borderRadius: 12,
-    padding: 16,
-  },
-  planName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: AppColors.text,
-    marginBottom: 8,
-  },
-  planDescription: {
-    fontSize: 14,
-    color: AppColors.textSecondary,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  upgradeButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: AppColors.primary,
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
-  },
-  upgradeButtonText: {
-    color: AppColors.surface,
-    fontSize: 14,
-    fontWeight: "600",
+  errorText: {
+    fontSize: 12,
+    color: "#FF6B6B",
+    marginTop: 4,
   },
   actionButtons: {
     flexDirection: "row",
@@ -284,10 +299,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: AppColors.primary,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  saveButtonLoading: {
+    backgroundColor: AppColors.primary,
+    opacity: 0.8,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: "600",
     color: AppColors.surface,
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingSpinner: {
+    marginRight: 8,
   },
 });

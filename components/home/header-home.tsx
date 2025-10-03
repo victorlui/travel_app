@@ -1,6 +1,5 @@
 import { AppColors } from "@/constants/colors";
 import { User } from "@/types/auth";
-import { FontAwesome6 } from "@expo/vector-icons";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,7 +20,9 @@ const HeaderHome: React.FC<Props> = ({ user }) => {
         <Text style={styles.headerText}>TravelAI</Text>
       </View>
       <TouchableOpacity style={styles.profileButton}>
-        <FontAwesome6 name="user" size={24} color={AppColors.textSecondary} />
+        <Text style={styles.profileButtonText}>
+          {user?.name?.charAt(0) || "M"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -58,6 +59,11 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: "center",
     alignItems: "center",
+  },
+  profileButtonText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: AppColors.textSecondary,
   },
 });
 

@@ -13,7 +13,10 @@ const RootLayoutApp: React.FC = () => {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="create-itinerary" />
       <Stack.Screen name="itinerary_generation" />
-      <Stack.Screen name="profile" />
+      <Stack.Screen name="payments" />
+      <Stack.Screen name="add-payments" />
+      <Stack.Screen name="change-password" />
+      <Stack.Screen name="change-plan" />
     </Stack>
   );
 };

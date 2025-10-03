@@ -1,6 +1,6 @@
 import PlanUpgrade from "@/components/ui/PlanUpgrade";
-import StatusBarComponent from "@/components/ui/StatusBar";
 import { AppColors } from "@/constants/colors";
+import LayoutMain from "@/layouts/LayoutApp";
 import { useAuthStore } from "@/store/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -12,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
@@ -51,8 +50,16 @@ export default function ProfileScreen() {
   ];
 
   const handleMenuPress = (itemId: string) => {
-    // Implementar navegação para cada item do menu
-    console.log(`Pressed: ${itemId}`);
+    switch (itemId) {
+      case "payments":
+        router.push("/(app)/payments");
+        break;
+      case "password":
+        router.push("/(app)/change-password");
+        break;
+      default:
+        console.log(`Pressed: ${itemId}`);
+    }
   };
 
   const handleEditProfile = () => {
@@ -65,9 +72,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.container}>
-      <StatusBarComponent backgroundColor={AppColors.surface} />
-
+    <LayoutMain>
       <View style={[styles.header]}>
         <View style={styles.profileInfo}>
           <TouchableOpacity style={styles.profileButton}>
@@ -138,7 +143,7 @@ export default function ProfileScreen() {
           <Text style={styles.deleteButtonText}>Excluir conta</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </LayoutMain>
   );
 }
 

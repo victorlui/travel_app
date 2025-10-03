@@ -1,8 +1,10 @@
+import { useUser } from "@/store/authStore";
 import { FontAwesome6 } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const Banner: React.FC = () => {
+  const user = useUser();
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -19,15 +21,33 @@ const Banner: React.FC = () => {
         <View style={styles.planInfo}>
           <FontAwesome6 name="crown" size={24} color="#10B981" />
           <Text style={styles.planText}>
-            <Text style={styles.planBold}>Plano Gratuito:</Text> você pode criar
-            até <Text style={styles.planHighlight}>3 itinerários</Text> por mês
+            <Text style={styles.planBold}>
+              Plano {user?.plan?.name === "free" ? "Gratuito" : "Premium"}:
+            </Text>{" "}
+            você pode criar até{" "}
+            <Text style={styles.planHighlight}>
+              {user?.plan?.max_itineraries_per_month} itinerários
+            </Text>{" "}
+            por mês
           </Text>
         </View>
 
         {/* Botão de ação */}
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>+ Criar novo itinerário</Text>
-        </TouchableOpacity>
+        {user?.itinerary_count_monthly! > 0 && (
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>+ Criar novo itinerário</Text>
+          </TouchableOpacity>
+        )}
+
+        {user?.itinerary_count_monthly! === 0 && (
+          <Text style={styles.planText}>
+            Você atingiu o limite de{" "}
+            <Text style={styles.planHighlight}>
+              {user?.plan?.max_itineraries_per_month} itinerários
+            </Text>{" "}
+            por mês. Ative o plano Premium para criar mais.
+          </Text>
+        )}
       </View>
     </View>
   );
